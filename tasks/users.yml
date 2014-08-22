@@ -1,0 +1,27 @@
+- name: Ensure PostgreSQL is running
+  service:
+    name: postgresql
+    state: started
+
+- name: Make sure the PostgreSQL users are present
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user:
+    name: "{{item.username}}"
+    password: "{{item.password | default('password')}}"
+    state: present
+    login_host: "{{item.hostname | default('localhost')}}"
+  with_items: postgresql_users
+  when: postgresql_users is defined and postgresql_users|length > 0
+
+- name: Update the user privileges
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user:
+    name: "{{item.username}}"
+    db: "{{item.database}}"
+    priv: "{{item.privilege | default('ALL')}}"
+    state: present
+    login_host: "{{item.hostname | default('localhost')}}"
+  with_items: postgresql_privileges
+  when: postgresql_privileges is defined and postgresql.privileges | length > 0

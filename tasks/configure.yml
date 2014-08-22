@@ -1,0 +1,46 @@
+# Configures postgresql.
+---
+- name: Make sure the PostgreSQL data directory exists
+  file:
+    path: "{{postgresql_data_directory}}"
+    owner: "{{postgresql_admin_user}}"
+    group: "{{postgresql_admin_user}}"
+    state: directory
+    mode: 0700
+
+- name: Reset the cluster - create a new one
+  sudo: yes
+  shell: >
+    pg_createcluster --start --locale {{postgresql_locale}} -e {{postgresql_encoding}} -d {{postgresql_data_directory}} {{postgresql_version}} {{postgresql_cluster_name}}
+    creates=/etc/postgresql/9.3/main
+
+- name: Update configuration [pg_hba.conf]
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{postgresql_conf_directory}}/pg_hba.conf"
+    owner: "{{postgresql_admin_user}}"
+    group: "{{postgresql_admin_user}}"
+    mode: 0640
+  register: postgresql_config_update
+
+- name: Update configuration [postgresql.conf]
+  template:
+    src: postgresql.conf.j2
+    dest: "{{postgresql_conf_directory}}/postgresql.conf"
+    owner: "{{postgresql_admin_user}}"
+    group: "{{postgresql_admin_user}}"
+    mode: 0640
+  register: postgresql_config_update
+
+- name: Create folder for additional configuration files
+  file:
+    name: "{{ postgresql_conf_directory }}/conf.d"
+    state: directory
+    owner: "{{ postgresql_admin_user }}"
+    group: "{{ postgresql_admin_user }}"
+    mode: 0755
+
+- name: PostgreSQL | Restart PostgreSQL
+  service:
+    name: postgresql
+    state: restarted

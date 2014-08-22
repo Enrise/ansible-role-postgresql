@@ -1,0 +1,20 @@
+# This file will install the necessary postgresql packages
+---
+- name: Install PostgreSQL
+  apt:
+    name: "{{item}}"
+    state: present
+  environment: postgresql_env
+  with_items:
+    - "postgresql-{{ postgresql_version }}"
+    - "postgresql-client-{{ postgresql_version }}"
+    - "postgresql-contrib"
+    - "python-psycopg2"
+
+- name: Install additional packages
+  apt:
+    name: "{{item}}"
+    state: present
+  environment: postgresql_env
+  with_items: postgresql_additional_packages
+  when: postgresql_additional_packages | length > 0
