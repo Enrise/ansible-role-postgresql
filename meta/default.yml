@@ -1,9 +1,9 @@
 ---
 galaxy_info:
   author: Berry Langerak
-  description:
+  description: An Ansible role for installing and configuring PostgreSQL.
   company: Enrise
-  license: BSD
+  license: MIT
   min_ansible_version: 1.2
 
   platforms:
